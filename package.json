@@ -1,6 +1,6 @@
 {
   "name": "vue-guard-component",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Component for vue that will only show its children when an ajax call is successful.",
   "repository": {
     "type": "git",
