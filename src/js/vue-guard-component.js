@@ -18,7 +18,7 @@ const guard = {
         }
     },
     render (createElement) {
-        if (this.show) {
+        if (this.show && this.$slots.default !== undefined) {
             return this.$slots.default[0];
         } else {
             return;
