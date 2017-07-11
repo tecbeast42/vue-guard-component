@@ -50,6 +50,10 @@ guardConfig.path = '/other/ajax/path';
 ## Use the Component
 
 ```
+<guard resource="restricted-component">
+    <other-component-that-is-restricted></other-component-that-is-restricted>
+</guard>
+
 <guard resource="restricted-component" v-on:guard-accepted="accepted()" v-on:guard-denied="denied()">
     <other-component-that-is-restricted></other-component-that-is-restricted>
 </guard>
