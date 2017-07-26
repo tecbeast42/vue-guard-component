@@ -16,6 +16,24 @@ describe('Vue-guard-component', () => {
         sandbox.restore();
     });
 
+    it('should emit error on bad response', (done) => {
+        const rejected = Promise.reject({ status: 500, data: '' });
+        sandbox.stub(axios, 'post').returns(rejected);
+
+        const vm = setup('resource="test" ref="guard" v-on:guard-error="setError"');
+        const component = vm.$refs.guard;
+        vm.$nextTick(() => {
+            vm.$nextTick(() => {
+                vm.$nextTick(() => {
+                    expect(vm.$el.textContent).to.equal('');
+                    expect(component.show).to.equal(false);
+                    expect(vm.error).to.equal(true);
+                    done();
+                });
+            });
+        });
+    });
+
     it('should not show on ajax denied', (done) => {
         const resolved = new Promise((r) => r({ status: 200, ok: 200, data: 'false' }));
         sandbox.stub(axios, 'post').returns(resolved);
@@ -76,6 +94,7 @@ function setup(options) {
             return {
                 accepted: false,
                 denied: false,
+                error: false,
             };
         },
         components: {
@@ -87,6 +106,9 @@ function setup(options) {
             },
             setDenied () {
                 this.denied = true;
+            },
+            setError () {
+                this.error = true;
             }
         }
     }).$mount();

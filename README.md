@@ -9,6 +9,8 @@ Vue-guard-component is a vue component built with webpack. It guards access to c
 
 If you want to include the uncompiled component instead of a compiled webpack js file you can require/import the file at `vue-guard-component/src/js/vue-guard-component.js`.
 
+To use the component, Vue-resource or Axios needs to be used and Vue.prototype.$http and Vue.http should be set.
+
 ## Installation
 
 ```
@@ -26,11 +28,18 @@ import guard from 'vue-guard-component';
 Vue.component('guard', guard);
 ```
 
-To change default ajax path:
+To change default config (path, property):
 ```
 import { guardConfig } from 'vue-guard-component';
 
 guardConfig.path = '/other/ajax/path';
+guardConfig.property = 'slug';
+```
+
+The default values are:
+```
+path: '/api/v1/route/access',
+property: 'id',
 ```
 
 ## Properties
@@ -47,11 +56,27 @@ guardConfig.path = '/other/ajax/path';
   * type: String
   * required: false
 
+### property
+
+   If the resource needs to match to something (like a model in laravel), then this is the property that it will be matched against, e.g. id or slug.
+  * type: String
+  * required: false,
+  * default: 'id' (from guardConfig)
+
+### value
+
+   The value of the property to match against.
+  * required: false
+
 ## Use the Component
 
 ```
 <guard resource="restricted-component">
     <other-component-that-is-restricted></other-component-that-is-restricted>
+</guard>
+
+<guard resource="show-model" property="id" value="1">
+    <model-component></model-component>
 </guard>
 
 <guard resource="restricted-component" v-on:guard-accepted="accepted()" v-on:guard-denied="denied()">
@@ -61,9 +86,16 @@ guardConfig.path = '/other/ajax/path';
 <guard resource="other-type" url="/api/route/to/other/access">
     <some-other-restricted-component></some-other-restricted-component>
 </guard>
+
+<guard resource="other-type">
+    <restricted-component></restricted-component>
+    <non-restricted-component slot="noAccess"></non-restricted-component>
+</guard>
 ```
 
-The component will emit events to the parent. "guard-accepted" when the ajax call gets "true" as response and "guard-denied" when it gets "false" as a response. To listen to them you use v-on in the template (like above).
+The component will emit events to the parent. "guard-accepted" when the ajax call gets "true" as response and "guard-denied" when it gets "false" as a response. To listen to them you use v-on in the template (like above). If there was an error or exception thrown, then "guard-error" will be emitted.
+
+Only the first slot will be rendered. If you want something to be rendered when no access is granted, you can add slot="noAccess" to a component (see example).
 
 ## SPA / Laravel-frontend-rights
 
