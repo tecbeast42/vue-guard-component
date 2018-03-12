@@ -9,7 +9,7 @@ Vue-guard-component is a vue component built with webpack. It guards access to c
 
 If you want to include the uncompiled component instead of a compiled webpack js file you can require/import the file at `vue-guard-component/src/js/vue-guard-component.js`.
 
-To use the component, Vue-resource or Axios needs to be used and Vue.prototype.$http and Vue.http should be set.
+To use the component, you need to set a function that returns true or false (or 'error').
 
 ## Installation
 
@@ -34,12 +34,21 @@ import { guardConfig } from 'vue-guard-component';
 
 guardConfig.path = '/other/ajax/path';
 guardConfig.property = 'slug';
+guardConfig.authFunction: function (url, data, callback) {
+  // e.g. api call to check
+  ajaxRequest(url, data).then((response) => {
+    callback(response); // response is true, false or 'error'
+  });
+}
 ```
+The authFunction takes the url, data and a callback function (see above). The callback function takes a parameter which should either be true (auth is accepted), false (auth is denied) or 'error' (some error occured).
+
 
 The default values are:
 ```
-path: '/api/v1/route/access',
+path: '/api/v2/route/access',
 property: 'id',
+authFunction: function () {}
 ```
 
 ## Properties

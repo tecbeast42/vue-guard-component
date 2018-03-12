@@ -1,13 +1,14 @@
 let guardConfig = {
-    path: '/api/v1/route/access',
+    path: '/api/v2/route/access',
     property: 'id',
-}
+    authFunction: function () {}
+};
 
 const guard = {
     data () {
         return {
             show: false
-        }
+        };
     },
     computed: {
         ajaxUrl () {
@@ -40,7 +41,7 @@ const guard = {
             return undefined;
         },
     },
-    render (createElement) {
+    render () {
         if (this.show && this.$slots.default !== undefined) {
             return this.$slots.default[0];
         } else if (this.noAccessSlot !== undefined) {
@@ -50,15 +51,15 @@ const guard = {
         }
     },
     created () {
-        this.$http.post(this.ajaxUrl, this.postData).then(response => {
-            if (JSON.parse(response.data)) {
+        guardConfig.authFunction(this.ajaxUrl, this.postData, (accepted) => {
+            if (accepted === 'error') {
+                this.$emit('guard-error');
+            } else if (accepted) {
                 this.show = true;
                 this.$emit('guard-accepted');
             } else {
                 this.$emit('guard-denied');
             }
-        }, response => {
-            this.$emit('guard-error');
         });
     },
     props: {
@@ -79,7 +80,7 @@ const guard = {
             required: false,
         }
     }
-}
+};
 
 export default guard;
 
