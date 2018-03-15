@@ -1,65 +1,45 @@
-import axios from 'axios';
-import sinon from 'sinon'
 import guard from '../src/js/vue-guard-component';
 import { guardConfig } from '../src/js/vue-guard-component';
-axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-Vue.prototype.$http = axios;
 
 describe('Vue-guard-component', () => {
-    let sandbox;
-
-    beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-    });
-
-    afterEach(() => {
-        sandbox.restore();
-    });
 
     it('should emit error on bad response', (done) => {
-        const rejected = Promise.reject({ status: 500, data: '' });
-        sandbox.stub(axios, 'post').returns(rejected);
+        guardConfig.authFunction = () => { return new Promise((resolve, reject) => reject('error')); };
 
         const vm = setup('resource="test" ref="guard" v-on:guard-error="setError"');
         const component = vm.$refs.guard;
         vm.$nextTick(() => {
             vm.$nextTick(() => {
-                vm.$nextTick(() => {
-                    expect(vm.$el.textContent).to.equal('');
-                    expect(component.show).to.equal(false);
-                    expect(vm.error).to.equal(true);
-                    done();
-                });
+                expect(vm.$el.textContent).to.equal('');
+                expect(component.show).to.equal(false);
+                expect(vm.error).to.equal(true);
+                done();
             });
         });
     });
 
     it('should not show on ajax denied', (done) => {
-        const resolved = new Promise((r) => r({ status: 200, ok: 200, data: 'false' }));
-        sandbox.stub(axios, 'post').returns(resolved);
+        guardConfig.authFunction = () => { return new Promise((resolve) => resolve(false)); };
 
         const vm = setup('resource="test" ref="guard" v-on:guard-accepted="setAccepted" v-on:guard-denied="setDenied"');
         const component = vm.$refs.guard;
         vm.$nextTick(() => {
             vm.$nextTick(() => {
-                vm.$nextTick(() => {
-                    expect(vm.$el.textContent).to.equal('');
-                    expect(component.show).to.equal(false);
-                    expect(vm.denied).to.equal(true);
-                    expect(vm.accepted).to.equal(false);
-                    done();
-                });
+                expect(vm.$el.textContent).to.equal('');
+                expect(component.show).to.equal(false);
+                expect(vm.denied).to.equal(true);
+                expect(vm.accepted).to.equal(false);
+                done();
             });
         });
     });
 
     it('show on ajax accept', (done) => {
-        const resolved = new Promise((r) => r({ status: 200, ok: 200, data: 'true' }));
-        sandbox.stub(axios, 'post').returns(resolved);
+        guardConfig.authFunction = () => { return new Promise((resolve) => resolve(true)); };
 
         const vm = setup('resource="test" ref="guard" v-on:guard-accepted="setAccepted" v-on:guard-denied="setDenied"');
         const component = vm.$refs.guard;
-        // vm.$el.querySelector('p')
+
         vm.$nextTick(() => {
             vm.$nextTick(() => {
                 vm.$nextTick(() => {

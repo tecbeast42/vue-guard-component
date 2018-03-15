@@ -28,27 +28,42 @@ import guard from 'vue-guard-component';
 Vue.component('guard', guard);
 ```
 
+GuardConfig default values are:
+```
+path: '/api/v1/route/access',
+property: 'id',
+authFunction: RequestBundler.bundleRequest
+```
+
 To change default config (path, property):
 ```
 import { guardConfig } from 'vue-guard-component';
 
 guardConfig.path = '/other/ajax/path';
 guardConfig.property = 'slug';
-guardConfig.authFunction: function (url, data, callback) {
+guardConfig.authFunction: function (url, data) {
   // e.g. api call to check
-  ajaxRequest(url, data).then((response) => {
-    callback(response); // response is true, false or 'error'
+  return new Promise((resolve, reject) => {
+    ajaxRequest(url, data).then((response) => {
+      resolve(response.data); // response is true, false
+    }, (error) => {
+      reject(error.response.data);
+    });
   });
 }
 ```
-The authFunction takes the url, data and a callback function (see above). The callback function takes a parameter which should either be true (auth is accepted), false (auth is denied) or 'error' (some error occured).
+The authFunction takes the url and data (resource, property, value). The function should return a promise on which the guard component will act on. Guard-accepted = resolve(true), guard-denied = resolve(false), guard-error reject(...).
 
+### RequestBundler
+The default authFunction (RequestBundler.bundleRequest) will automatically bundle requests to the same url.
 
-The default values are:
+To use the class for other purposes you can import it:
 ```
-path: '/api/v2/route/access',
-property: 'id',
-authFunction: function () {}
+import { RequestBundler } from 'vue-guard-component';
+```
+or as a singleton:
+```
+import { requestBundler } from 'vue-guard-component';
 ```
 
 ## Properties

@@ -1,7 +1,9 @@
+import { RequestBundler, requestBundler } from './requestBundler';
+
 let guardConfig = {
-    path: '/api/v2/route/access',
+    path: '/api/v1/route/access',
     property: 'id',
-    authFunction: function () {}
+    authFunction: RequestBundler.bundleRequest
 };
 
 const guard = {
@@ -51,15 +53,15 @@ const guard = {
         }
     },
     created () {
-        guardConfig.authFunction(this.ajaxUrl, this.postData, (accepted) => {
-            if (accepted === 'error') {
-                this.$emit('guard-error');
-            } else if (accepted) {
+        guardConfig.authFunction(this.ajaxUrl, this.postData).then((accepted) => {
+            if (accepted) {
                 this.show = true;
                 this.$emit('guard-accepted');
             } else {
                 this.$emit('guard-denied');
             }
+        }, (error) => {
+            this.$emit('guard-error', error);
         });
     },
     props: {
@@ -84,4 +86,4 @@ const guard = {
 
 export default guard;
 
-export { guardConfig };
+export { guardConfig, RequestBundler, requestBundler };
