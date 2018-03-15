@@ -9,7 +9,7 @@ Vue-guard-component is a vue component built with webpack. It guards access to c
 
 If you want to include the uncompiled component instead of a compiled webpack js file you can require/import the file at `vue-guard-component/src/js/vue-guard-component.js`.
 
-To use the component, Vue-resource or Axios needs to be used and Vue.prototype.$http and Vue.http should be set.
+To use the component, you need to set a function that returns true or false (or 'error').
 
 ## Installation
 
@@ -28,18 +28,42 @@ import guard from 'vue-guard-component';
 Vue.component('guard', guard);
 ```
 
+GuardConfig default values are:
+```
+path: '/api/v1/route/access',
+property: 'id',
+authFunction: RequestBundler.bundleRequest
+```
+
 To change default config (path, property):
 ```
 import { guardConfig } from 'vue-guard-component';
 
 guardConfig.path = '/other/ajax/path';
 guardConfig.property = 'slug';
+guardConfig.authFunction: function (url, data) {
+  // e.g. api call to check
+  return new Promise((resolve, reject) => {
+    ajaxRequest(url, data).then((response) => {
+      resolve(response.data); // response is true, false
+    }, (error) => {
+      reject(error.response.data);
+    });
+  });
+}
 ```
+The authFunction takes the url and data (resource, property, value). The function should return a promise on which the guard component will act on. Guard-accepted = resolve(true), guard-denied = resolve(false), guard-error reject(...).
 
-The default values are:
+### RequestBundler
+The default authFunction (RequestBundler.bundleRequest) will automatically bundle requests to the same url.
+
+To use the class for other purposes you can import it:
 ```
-path: '/api/v1/route/access',
-property: 'id',
+import { RequestBundler } from 'vue-guard-component';
+```
+or as a singleton:
+```
+import { requestBundler } from 'vue-guard-component';
 ```
 
 ## Properties
