@@ -6,7 +6,7 @@
     "type": "git",
     "url": "git+https://github.com/tecbeast42/vue-guard-component.git"
   },
-  "main": "dist/js/vue-guard-component.js",
+  "main": "src/js/vue-guard-component.js",
   "keywords": [
     "vue",
     "guard component",
